@@ -7,6 +7,7 @@ import ObraCard from '../components/ObraCard';
 import { OBRAS } from '../data/obras';
 import { colors, spacing } from '../theme';
 import type { EstadoObra } from '../types/models';
+import type { ObrasStackScreenProps } from '../types/navigation';
 
 type Filtro = 'todas' | EstadoObra;
 
@@ -17,7 +18,7 @@ const FILTROS: { value: Filtro; label: string }[] = [
   { value: 'finalizada', label: 'Finalizadas' },
 ];
 
-export default function ObrasListScreen() {
+export default function ObrasListScreen({ navigation }: ObrasStackScreenProps<'ObrasList'>) {
   const [filtro, setFiltro] = useState<Filtro>('todas');
 
   const data = useMemo(() => (filtro === 'todas' ? OBRAS : OBRAS.filter((o) => o.estado === filtro)), [filtro]);
@@ -34,7 +35,9 @@ export default function ObrasListScreen() {
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ObraCard obra={item} />}
+        renderItem={({ item }) => (
+          <ObraCard obra={item} onPress={() => navigation.navigate('ObraDetail', { obraId: item.id })} />
+        )}
         ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
         contentContainerStyle={styles.list}
         ListEmptyComponent={

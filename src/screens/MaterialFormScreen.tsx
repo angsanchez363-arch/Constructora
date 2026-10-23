@@ -1,4 +1,5 @@
 // SEMANA 2: inputs controlados, teclados numéricos y validación manual.
+// SEMANA 3: se presenta como pantalla modal dentro del Stack de Materiales.
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Chip from '../components/Chip';
@@ -7,6 +8,7 @@ import { useMaterials } from '../context/MaterialsContext';
 import { CATEGORIAS } from '../data/materials';
 import { colors, font, radius, spacing } from '../theme';
 import type { Categoria } from '../types/models';
+import type { MaterialesStackScreenProps } from '../types/navigation';
 
 interface Errors {
   name?: string;
@@ -15,7 +17,7 @@ interface Errors {
   stock?: string;
 }
 
-export default function MaterialFormScreen({ onDone }: { onDone: () => void }) {
+export default function MaterialFormScreen({ navigation }: MaterialesStackScreenProps<'MaterialForm'>) {
   const { addMaterial } = useMaterials();
   const [name, setName] = useState('');
   const [category, setCategory] = useState<Categoria>(CATEGORIAS[0]);
@@ -50,7 +52,7 @@ export default function MaterialFormScreen({ onDone }: { onDone: () => void }) {
       description: description.trim(),
     });
     Alert.alert('Material guardado', `${nuevo.name} ya está en el catálogo.`, [
-      { text: 'Aceptar', onPress: onDone },
+      { text: 'Aceptar', onPress: () => navigation.goBack() },
     ]);
   };
 
@@ -84,9 +86,6 @@ export default function MaterialFormScreen({ onDone }: { onDone: () => void }) {
         <Pressable style={({ pressed }) => [styles.button, pressed && { opacity: 0.85 }]} onPress={onSubmit} accessibilityRole="button">
           <Text style={styles.buttonText}>Guardar material</Text>
         </Pressable>
-        <Pressable style={styles.cancelButton} onPress={onDone} accessibilityRole="button">
-          <Text style={styles.cancelText}>Cancelar</Text>
-        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -100,7 +99,5 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   multiline: { minHeight: 80, textAlignVertical: 'top' },
   button: { backgroundColor: colors.accent, borderRadius: radius.md, paddingVertical: spacing.lg, alignItems: 'center' },
-  cancelButton: { borderRadius: radius.md, paddingVertical: spacing.md, alignItems: 'center', borderWidth: 1, borderColor: colors.line },
-  cancelText: { fontSize: font.md, fontWeight: '700', color: colors.ink },
   buttonText: { fontSize: font.lg, fontWeight: '800', color: colors.accentInk },
 });

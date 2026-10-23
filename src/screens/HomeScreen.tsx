@@ -1,13 +1,14 @@
 // SEMANA 1: Core Components (View, Text, Image, ScrollView, Pressable) y Flexbox.
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ObraCard from '../components/ObraCard';
 import StatCard from '../components/StatCard';
 import { useMaterials } from '../context/MaterialsContext';
 import { OBRAS } from '../data/obras';
 import { colors, font, radius, spacing } from '../theme';
+import type { RootTabScreenProps } from '../types/navigation';
 import { formatCOP } from '../utils/format';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }: RootTabScreenProps<'InicioTab'>) {
   const { materials } = useMaterials();
 
   const obrasEnCurso = OBRAS.filter((o) => o.estado === 'en_curso');
@@ -39,7 +40,11 @@ export default function HomeScreen() {
       <Text style={styles.sectionTitle}>Obras en curso</Text>
       <View style={styles.list}>
         {obrasEnCurso.map((obra) => (
-          <ObraCard key={obra.id} obra={obra} />
+          <ObraCard
+            key={obra.id}
+            obra={obra}
+            onPress={() => navigation.navigate('ObrasTab', { screen: 'ObraDetail', params: { obraId: obra.id } })}
+          />
         ))}
       </View>
 
@@ -49,10 +54,17 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Por reponer</Text>
           <View style={styles.alertBox}>
             {stockBajo.map((m) => (
-              <View key={m.id} style={styles.alertRow}>
+              <Pressable
+                key={m.id}
+                style={styles.alertRow}
+                accessibilityRole="button"
+                onPress={() =>
+                  navigation.navigate('MaterialesTab', { screen: 'MaterialDetail', params: { materialId: m.id } })
+                }
+              >
                 <Text style={styles.alertName}>{m.emoji} {m.name}</Text>
                 <Text style={styles.alertStock}>{m.stock === 0 ? 'Agotado' : `${m.stock} u.`}</Text>
-              </View>
+              </Pressable>
             ))}
           </View>
         </>
