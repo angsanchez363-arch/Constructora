@@ -6,7 +6,7 @@ import ProgressBar from './ProgressBar';
 
 interface Props {
   obra: Obra;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export default function ObraCard({ obra, onPress }: Props) {
