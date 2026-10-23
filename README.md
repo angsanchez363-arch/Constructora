@@ -1,18 +1,18 @@
-# Constructora Cimientos - Semana 01: Core Components y Flexbox
+# Constructora Cimientos - Semana 02: Listas, inputs y estilos
 
 Bootcamp React Native (bc-reactnative) - Dominio: **Constructora** (obras y materiales).
 
 ## Que incluye esta semana
-- Pantalla de **Inicio**: imagen de portada, tarjetas de estadisticas, obras en curso y materiales por reponer.
-- Pantalla de **Contacto**: datos de la constructora con enlaces (`Linking`).
-- Componentes `View`, `Text`, `Image`, `ScrollView`, `Pressable`, `StyleSheet` y Flexbox (`flexDirection`, `flex`, `gap`, `flexWrap`, `justifyContent`, `alignItems`).
-- Cambio de pantalla con estado local (`useState`) y una barra inferior simple.
+- Todo lo de la semana 1.
+- Lista de **Obras** con `FlatList` y filtros por estado.
+- Lista de **Materiales** con busqueda (`TextInput`), chips de categoria, `Switch` "solo con existencias", `RefreshControl` y estado vacio.
+- **Formulario** para agregar materiales con teclados numericos y validacion.
+- Estado compartido con `MaterialsContext`.
 
 ## Archivos principales
-- `App.tsx`
-- `src/screens/HomeScreen.tsx`, `src/screens/ContactoScreen.tsx`
-- `src/components/` (StatCard, Badge, ProgressBar, ObraCard, SimpleTabBar)
-- `src/data/` (obras y materiales de ejemplo)
+- `src/screens/ObrasListScreen.tsx`, `MaterialesListScreen.tsx`, `MaterialFormScreen.tsx`
+- `src/components/` (Chip, SearchInput, FormField, EmptyState, MaterialCard)
+- `src/context/MaterialsContext.tsx`
 
 ## Como ejecutarlo
 ```bash
@@ -22,4 +22,4 @@ npx expo start
 ```
 
 ## Siguiente semana
-Semana 2: listas con `FlatList`, inputs, filtros y formulario.
+Semana 3: React Navigation 7 (tabs + stacks), detalle con parametros tipados.

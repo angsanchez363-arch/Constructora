@@ -2,13 +2,13 @@
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ObraCard from '../components/ObraCard';
 import StatCard from '../components/StatCard';
-import { MATERIALS } from '../data/materials';
+import { useMaterials } from '../context/MaterialsContext';
 import { OBRAS } from '../data/obras';
 import { colors, font, radius, spacing } from '../theme';
 import { formatCOP } from '../utils/format';
 
 export default function HomeScreen() {
-  const materials = MATERIALS;
+  const { materials } = useMaterials();
 
   const obrasEnCurso = OBRAS.filter((o) => o.estado === 'en_curso');
   const stockBajo = materials.filter((m) => m.stock <= m.minStock);
