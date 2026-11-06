@@ -1,0 +1,9 @@
+import type { Obra } from '../types/models';
+
+export const OBRAS: Obra[] = [
+  { id: 'obra-01', nombre: 'Edificio Altos del Parque', cliente: 'Inversiones Cedro S.A.S.', ubicacion: 'Chapinero, Bogotá', estado: 'en_curso', avance: 62, presupuesto: 2850000000, fechaInicio: '2025-03-10', descripcion: 'Torre residencial de 12 pisos con 48 apartamentos y 2 sótanos de parqueadero.', materialIds: ['mat-01', 'mat-02', 'mat-03', 'mat-04', 'mat-09'] },
+  { id: 'obra-02', nombre: 'Conjunto Residencial Mirador', cliente: 'Constructora Andina Ltda.', ubicacion: 'Soacha, Cundinamarca', estado: 'en_curso', avance: 35, presupuesto: 4200000000, fechaInicio: '2025-06-02', descripcion: 'Conjunto cerrado de 4 torres de 5 pisos, zonas comunes y salón social.', materialIds: ['mat-01', 'mat-03', 'mat-05', 'mat-06', 'mat-11', 'mat-12'] },
+  { id: 'obra-03', nombre: 'Bodega Logística Fontibón', cliente: 'LogiCarga S.A.', ubicacion: 'Fontibón, Bogotá', estado: 'finalizada', avance: 100, presupuesto: 1450000000, fechaInicio: '2024-08-19', descripcion: 'Bodega industrial de 3.200 m² con muelles de carga y oficinas.', materialIds: ['mat-02', 'mat-03', 'mat-04', 'mat-09'] },
+  { id: 'obra-04', nombre: 'Remodelación Colegio San Martín', cliente: 'Fundación San Martín', ubicacion: 'Usaquén, Bogotá', estado: 'planeacion', avance: 5, presupuesto: 680000000, fechaInicio: '2026-01-12', descripcion: 'Renovación de 14 aulas, baterías sanitarias y cubierta del patio central.', materialIds: ['mat-07', 'mat-08', 'mat-10', 'mat-11'] },
+  { id: 'obra-05', nombre: 'Casa campestre La Calera', cliente: 'Familia Rojas Prieto', ubicacion: 'La Calera, Cundinamarca', estado: 'en_curso', avance: 80, presupuesto: 920000000, fechaInicio: '2025-02-03', descripcion: 'Vivienda de dos niveles con 420 m² construidos, terraza y muros en piedra.', materialIds: ['mat-01', 'mat-05', 'mat-07', 'mat-08', 'mat-09'] },
+];
