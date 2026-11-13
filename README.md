@@ -97,3 +97,24 @@ Qué se puede probar en la app:
 - Consumir una API REST con **TanStack Query**.
 - Formularios con **React Hook Form + Zod**.
 - Autenticación y persistencia con **SecureStore**.
+
+## 🖥️ Semana 5 — Configuración y pruebas en servidor
+
+Se agregó un backend (`server/`, Node 22 + PostgreSQL) para poder practicar la implantación.
+La app móvil sigue usando sus datos locales; el backend es el que se despliega y migra.
+
+| Pieza | Dónde |
+|---|---|
+| Variables de entorno completas (valores ficticios) | `.env.example` |
+| Falla al arrancar con mensaje claro si falta configuración | `server/src/config.js` |
+| Endpoint de salud (verifica PostgreSQL) | `GET /api/health` en `server/src/index.js` |
+| Healthchecks, reinicio y rotación de logs | `deploy/compose.prod.yaml`, `server/Dockerfile` |
+| Prueba de humo ampliada | `scripts/smoke-test.sh` |
+| Migración con huellas y rollback | `scripts/migrar.sh`, `server/sql/validar.sql` |
+| Entregable (sección 6 y evidencia 2.8) | `docs/entregable-s05-configuracion-y-verificacion.md` |
+
+```bash
+cp .env.example .env
+docker compose -f deploy/compose.prod.yaml --env-file .env up -d --build --wait
+bash scripts/smoke-test.sh
+```
