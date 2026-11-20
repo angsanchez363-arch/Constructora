@@ -1,8 +1,15 @@
 // Migraciones simples y versionadas. La tabla schema_migrations viaja con los datos
 // en la migración a la nube: así la app no intenta crear tablas que ya existen.
+// SEMANA 6: las migraciones corren con el rol DUEÑO (MIGRATION_DATABASE_URL). La API usa otro
+// rol (DATABASE_URL) que no puede crear, alterar ni borrar tablas.
 import { readFileSync } from 'node:fs';
-import { config } from './config.js';
 
+if (process.env.MIGRATION_DATABASE_URL?.trim()) {
+  process.env.DATABASE_URL = process.env.MIGRATION_DATABASE_URL;
+} else {
+  console.warn('aviso: MIGRATION_DATABASE_URL no está definida; se usa DATABASE_URL (rol de la app). Solo para desarrollo.');
+}
+await import('./config.js'); // valida la configuración antes de conectar
 const { pool } = await import('./db.js');
 const seed = JSON.parse(readFileSync(new URL('../sql/seed.json', import.meta.url), 'utf8'));
 
@@ -45,6 +52,11 @@ const MIGRACIONES = [
 const c = await pool.connect();
 try {
   await c.query('CREATE TABLE IF NOT EXISTS schema_migrations (version TEXT PRIMARY KEY, aplicada_en TIMESTAMPTZ DEFAULT now())');
+  // La app no necesita leer ni escribir el control de migraciones.
+  await c.query(`DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'constructora_app') THEN
+      REVOKE ALL ON schema_migrations FROM constructora_app;
+    END IF; END $$`);
   const { rows } = await c.query('SELECT version FROM schema_migrations');
   const hechas = new Set(rows.map((r) => r.version));
   for (const m of MIGRACIONES) {

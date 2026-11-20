@@ -54,7 +54,9 @@ const server = http.createServer(async (req, res) => {
       }
     }
     if (req.method === 'DELETE' && pathname.startsWith('/api/materiales/')) {
-      const r = await pool.query('DELETE FROM materiales WHERE id = $1', [decodeURIComponent(pathname.split('/').pop())]);
+      let id;
+      try { id = decodeURIComponent(pathname.split('/').pop()); } catch { return json(res, 400, { error: 'id inválido' }); }
+      const r = await pool.query('DELETE FROM materiales WHERE id = $1', [id]);
       return json(res, r.rowCount ? 200 : 404, r.rowCount ? { eliminado: true } : { error: 'no encontrado' });
     }
     return json(res, 404, { error: 'ruta no encontrada' });
@@ -63,6 +65,14 @@ const server = http.createServer(async (req, res) => {
     return json(res, 500, { error: 'error interno' });
   }
 });
+
+// SEMANA 6: avisa si la API se conectó con un rol con demasiado poder.
+pool.query('SELECT rolsuper, rolcreatedb, rolcreaterole FROM pg_roles WHERE rolname = current_user')
+  .then(({ rows: [r] }) => {
+    if (r && (r.rolsuper || r.rolcreatedb || r.rolcreaterole))
+      console.warn('ADVERTENCIA: la API usa un rol con privilegios de administración. Usa constructora_app.');
+  })
+  .catch(() => {});
 
 server.listen(config.port, '0.0.0.0', () => console.log(`constructora-api ${config.version} escuchando en :${config.port}`));
 process.on('SIGTERM', () => server.close(() => pool.end().then(() => process.exit(0))));

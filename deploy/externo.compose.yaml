@@ -1,0 +1,21 @@
+# Copia "fuera del sitio": servidor REST de restic en modo SOLO-AGREGAR.
+# Va en OTRO equipo/VM distinto del servidor de la app. Quien tenga las credenciales del servidor
+# de la app puede AGREGAR respaldos, pero no borrarlos ni sobrescribirlos.
+# Uso (en el equipo externo):  docker compose -f externo.compose.yaml up -d
+#   Crea usuario:  docker compose -f externo.compose.yaml exec externo htpasswd -B -c /data/.htpasswd respaldo
+#   REPO_EXTERNO en el servidor de la app: rest:https://respaldo:<clave>@<host-externo>:8000/constructora
+#   Pon un proxy con HTTPS delante: no expongas este puerto en claro por Internet.
+# La retención del externo la aplica su administrador desde ESTE equipo (restic forget --prune).
+name: constructora-externo
+services:
+  externo:
+    image: restic/rest-server:0.13.0
+    restart: unless-stopped
+    environment:
+      OPTIONS: "--append-only --private-repos"
+    ports:
+      - "8000:8000"
+    volumes:
+      - externo:/data
+volumes:
+  externo:

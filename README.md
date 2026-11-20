@@ -3,14 +3,14 @@
 Proyecto del **Bootcamp React Native (bc-reactnative)** · Dominio asignado: **Constructora**
 Entidades del dominio: `obras`, `materiales`.
 
-Es **una sola app que evoluciona semana a semana**. Este entregable cubre las semanas 1 a 4.
+Es **una sola app que evoluciona semana a semana**. Este entregable cubre las semanas 1 a 4 (app móvil) y las semanas 5 y 6 (implantación del backend).
 
 ## ▶️ Cómo ejecutarla
 
 Requisitos: Node.js 22+, pnpm (o npm) y la app **Expo Go** en tu celular.
 
 ```bash
-cd constructora-rn
+cd Constructora
 pnpm install              # o: npm install
 npx expo install --fix    # alinea las versiones de Expo/React Native con tu SDK
 npx expo start            # escanea el QR con Expo Go (o presiona a / i / w)
@@ -114,7 +114,36 @@ La app móvil sigue usando sus datos locales; el backend es el que se despliega 
 | Entregable (sección 6 y evidencia 2.8) | `docs/entregable-s05-configuracion-y-verificacion.md` |
 
 ```bash
-cp .env.example .env
+cp .env.example .env && chmod 640 .env     # reemplaza TODAS las claves "cambia-..." (openssl rand -hex 24)
 docker compose -f deploy/compose.prod.yaml --env-file .env up -d --build --wait
 bash scripts/smoke-test.sh
 ```
+
+> Cambios de la revisión: el pool de PostgreSQL ya no tumba la API cuando la base se detiene
+> (caso F-06); `DELETE` con un id mal codificado da 400 en vez de 500; el servicio `migrar` aplica
+> las migraciones y la API arranca después; `migrar.sh` ahora aplica roles en el destino y usa
+> `--exit-on-error`. Si vienes de una versión anterior: `docker compose ... down -v` y vuelve a
+> levantar (cambió el administrador de la base a `postgres` y se crearon los roles).
+
+## 🔐 Semana 6 — Seguridad, usuarios y permisos
+
+| Pieza | Dónde |
+|---|---|
+| Roles de mínimo privilegio (`constructora_owner`, `constructora_app`, `constructora_respaldo`) | `server/sql/01-roles.sql`, `server/sql/02-permisos.sql`, `server/sql/initdb/01-roles.sh` |
+| Migraciones con el rol dueño; la API sin DDL | servicio `migrar` en `deploy/compose.prod.yaml`, `server/src/migrate.js` |
+| Cuentas, `sudo` limitado, SSH solo con llave, UFW | `scripts/endurecer-servidor.sh` |
+| Pruebas negativas de privilegios (tabla 7.4) | `scripts/pruebas-privilegios.sh` |
+| Rotación de claves | `scripts/rotar-clave.sh app\|owner\|respaldo\|admin` |
+| Revisión de secretos en árbol e historial | `scripts/revisar-secretos.sh` |
+| Respaldo cifrado (restic + cron + copia externa solo-agregar) | `scripts/respaldar.sh`, `scripts/configurar-respaldo.sh`, `deploy/externo.compose.yaml` |
+| Restauración de desastre con tiempo medido | `scripts/restaurar.sh` |
+| Recolector de evidencia | `scripts/evidencia.sh` |
+| Entregable (sección 7 y sección 3 final) | `docs/entregable-s06-seguridad-y-respaldo.md` |
+
+```bash
+sudo ADMINS="ana" OPERADORES="luis" bash scripts/endurecer-servidor.sh     # en el servidor Ubuntu
+sudo REPO_EXTERNO=<repositorio-restic-externo> bash scripts/configurar-respaldo.sh
+bash scripts/pruebas-privilegios.sh && sudo bash scripts/evidencia.sh
+```
+
+Las celdas **PENDIENTE** de `docs/` son evidencia que solo se genera ejecutando todo en tu servidor.

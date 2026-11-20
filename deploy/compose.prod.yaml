@@ -1,6 +1,7 @@
-# Producción (servidor propio): API + PostgreSQL con healthchecks, reinicio y rotación de logs.
+# Producción (servidor propio): API + PostgreSQL con healthchecks, reinicio, rotación de logs
+# y roles de mínimo privilegio (semana 6).
 # Uso (desde la raíz del repo):
-#   cp .env.example .env && chmod 600 .env
+#   cp .env.example .env && chmod 640 .env     # y reemplaza TODAS las claves "cambia-..."
 #   docker compose -f deploy/compose.prod.yaml --env-file .env up -d --build --wait
 name: constructora
 
@@ -15,13 +16,23 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
+      # POSTGRES_USER es el ADMINISTRADOR: solo para administrar, nunca para la app.
       POSTGRES_USER: ${POSTGRES_USER:?Define POSTGRES_USER en .env}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
       POSTGRES_DB: ${POSTGRES_DB:?Define POSTGRES_DB en .env}
+      # Contraseñas de los roles de mínimo privilegio (las usa initdb/01-roles.sh)
+      OWNER_PASSWORD: ${OWNER_PASSWORD:?Define OWNER_PASSWORD en .env}
+      APP_PASSWORD: ${APP_PASSWORD:?Define APP_PASSWORD en .env}
+      RESPALDO_PASSWORD: ${RESPALDO_PASSWORD:?Define RESPALDO_PASSWORD en .env}
     volumes:
       - datos:/var/lib/postgresql/data
       - ../server/sql:/sql:ro
+      - ../server/sql/initdb:/docker-entrypoint-initdb.d:ro
       - ../respaldos:/respaldos
+    # Solo en loopback: el respaldo (pg_dump desde el servidor) llega por aquí. Desde otro equipo
+    # el puerto no responde. Nunca publiques "5432:5432": Docker salta las reglas de UFW.
+    ports:
+      - "127.0.0.1:${DB_HOST_PORT:-5432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -29,12 +40,26 @@ services:
       retries: 10
     logging: *logging
 
+  # Tarea de una sola vez: aplica las migraciones con el rol DUEÑO y termina.
+  migrar:
+    build: ../server
+    image: constructora-api:${APP_VERSION:-dev}
+    command: ["node", "src/migrate.js"]
+    restart: "no"
+    environment:
+      MIGRATION_DATABASE_URL: ${MIGRATION_DATABASE_URL:?Define MIGRATION_DATABASE_URL en .env}
+      DB_SSL: ${DB_SSL:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logging
+
   api:
     build: ../server
     image: constructora-api:${APP_VERSION:-dev}
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${DATABASE_URL:?Define DATABASE_URL en .env}
+      DATABASE_URL: ${DATABASE_URL:?Define DATABASE_URL en .env}   # rol constructora_app
       DB_SSL: ${DB_SSL:-false}
       PORT: ${PORT:-8000}
       APP_VERSION: ${APP_VERSION:-dev}
@@ -43,6 +68,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrar:
+        condition: service_completed_successfully
     logging: *logging
 
 volumes:

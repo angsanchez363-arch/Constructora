@@ -8,3 +8,9 @@ dist/
 respaldos/*
 !respaldos/.gitkeep
 huella-*.txt
+# Semana 6: nunca versionar secretos ni respaldos
+*.dump
+*.pgpass
+.pgpass
+/etc-restic-password
+huella-*.txt
